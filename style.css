@@ -1,0 +1,82 @@
+:root {
+  --color-bg: #222222;
+  --color-fg: #eeeeee;
+  --color-em: #3366ff;
+  font-family: Helvetica, Arial, sans-serif;
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+}
+
+.hidden {
+  display: none !important;
+}
+
+body {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 15px;
+  gap: 10px;
+}
+
+h1 {
+  margin: 0px;
+}
+
+#inputs {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 10px;
+}
+
+#inputs button {
+  color: var(--color-fg);
+  background-color: var(--color-em);
+  padding: 10px 20px;
+  font-size: 100%;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+
+#inputs button:hover {
+  filter: brightness(150%);
+}
+
+#inputs span {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+#inputs span:empty::after {
+  content: "No file selected";
+}
+
+#popup {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+}
+
+#popup .x::after {
+  content: "\2715";
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  margin: 0px;
+  cursor: pointer;
+}

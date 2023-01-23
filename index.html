@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>MusicXML Lyrics</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <h1>MusicXML Lyrics</h1>
+    <section id="inputs">
+      <button onclick="triggerUpload('music')">MusicXML</button>
+      <span class="music"></span>
+      <button onclick="triggerUpload('lyrics')">Lyrics</button>
+      <span class="lyrics"></span>
+      <button onclick="generate()">Output</button>
+      <span class="output">Download</span>
+    </section>
+    <section id="popup" class="hidden">
+      <span class="x" onclick="closePopup()"></span>
+      <p class="content"></p>
+    </section>
+    <input type="file" class="hidden music" onchange="updateInput('music')" />
+    <input type="file" class="hidden lyrics" onchange="updateInput('lyrics')" />
+    <script src="jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
