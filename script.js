@@ -124,6 +124,7 @@ function generate() {
             let out = addLyrics(musicValue, lyricsValue);
             let name = music[0].name.split(".")[0];
             downloadString(out, `${name}-with-lyrics.musicxml`);
+            console.log(out);
           }
           catch (e) {
             openPopup(e.message);
@@ -138,10 +139,10 @@ function addLyrics(music, lyrics) {
   let xmlDoc = $.parseXML(music);
   let xml = $(xmlDoc);
 
-  let words = lyrics.split(" ");
+  let words = lyrics.split(/\s+/);
 
-  const PART = $("#inputs .part").text();
-  const STAFF = $("#inputs .staff").text();
+  const PART = $("#select-part .dropdown").val();
+  const STAFF = $("#select-staff .staff-no").val();
 
   let part = xml.find(`part[id="${PART}"]`);
 
@@ -177,7 +178,7 @@ function getNoteHandler(staff, lyricGenerator) {
     }
 
     if (word.value.startsWith("%")) {
-      return false; // skip note if word starts with '%'
+      return true; // skip note if word starts with '%'
     }
 
     if (word.value.startsWith("\\")) {
