@@ -9,19 +9,33 @@
   <body>
     <h1>MusicXML Lyrics</h1>
     <section id="inputs">
-      <button onclick="triggerUpload('music')">MusicXML</button>
+      <button onclick="triggerUpload('music');">MusicXML</button>
       <span class="music"></span>
-      <button onclick="triggerUpload('lyrics')">Lyrics</button>
+      <button onclick="triggerUpload('lyrics');">Lyrics</button>
       <span class="lyrics"></span>
-      <button onclick="generate()">Output</button>
+      <button onclick="generate();">Generate</button>
       <span class="output">Download</span>
+      <button onclick="selectPart();">Part&hellip;</button>
+      <span class="part">&hellip;</span>
+      <button onclick="selectStaff();">Staff&hellip;</button>
+      <span class="staff">&hellip;</span>
     </section>
-    <section id="popup" class="hidden">
-      <span class="x" onclick="closePopup()"></span>
+    <section id="info" class="hidden popup">
+      <span class="x" onclick="closePopup();"></span>
       <p class="content"></p>
     </section>
-    <input type="file" class="hidden music" onchange="updateInput('music')" />
-    <input type="file" class="hidden lyrics" onchange="updateInput('lyrics')" />
+    <section id="select-part" class="hidden popup">
+      <span class="x" onclick="closePopup(); updatePart();"></span>
+      <select class="dropdown">
+        <option value="&hellip;">(no parts)</option>
+      </select>
+    </section>
+    <section id="select-staff" class="hidden popup">
+      <span class="x" onclick="closePopup(); updateStaff();"></span>
+      <input type="number" class="staff-no"></input>
+    </section>
+    <input type="file" class="hidden music" onchange="updateInput('music'); updateParts();" />
+    <input type="file" class="hidden lyrics" onchange="updateInput('lyrics');" />
     <script src="jquery-3.6.0.min.js"></script>
     <script src="script.js"></script>
   </body>

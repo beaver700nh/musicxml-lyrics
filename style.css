@@ -58,7 +58,7 @@ h1 {
   content: "No file selected";
 }
 
-#popup {
+.popup {
   position: fixed;
   top: 0px;
   left: 0px;
@@ -72,11 +72,27 @@ h1 {
   background-color: var(--color-bg);
 }
 
-#popup .x::after {
+.popup .x::after {
   content: "\2715";
   position: absolute;
   top: 5px;
   right: 8px;
   margin: 0px;
   cursor: pointer;
+}
+
+#select-part .dropdown {
+  border: 3px solid var(--color-fg);
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+  padding: 10px 20px;
+  font-size: 100%;
+}
+
+#select-staff .staff-no {
+  border: 3px solid var(--color-fg);
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+  padding: 10px 10px;
+  font-size: 100%;
 }

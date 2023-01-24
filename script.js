@@ -37,46 +37,82 @@ function triggerUpload(classname) {
 }
 
 function getUploads(classname) {
-  return $(`input[type=file].${classname}`).get(0).files;
+  return $(`input[type=file].${classname}`).prop("files");
 }
 
 function updateInput(classname) {
   let input = window.event.srcElement;
+
+  if (input.files.length === 0) {
+    $("#inputs").find("." + classname).text("");
+    return;
+  }
+
   let file = input.files[0];
 
-  $(`#inputs`).find("." + classname).text(
-    "{0} - {1} ({2})".format(
-      file.name, file.type, fileSizeFormat(file.size)
-    )
+  $("#inputs").find("." + classname).text(
+    "{0} ({1})".format(file.name, fileSizeFormat(file.size))
+  );
+}
+
+function updateParts() {
+  let music = getUploads("music");
+
+  if (music.length === 0) {
+    return;
+  }
+
+  music[0].text().then(
+    function (musicValue) {
+      populateParts($($.parseXML(musicValue)));
+    }
+  );
+}
+
+function populateParts(xml) {
+  let dropdown = $("#select-part .dropdown");
+  dropdown.empty();
+
+  for (p of Array.from(xml.find("score-part"))) {
+    dropdown.append(`<option value="${p.id}">${p.id}</option>`);
+  }
+}
+
+function selectPart() {
+  $("#select-part").removeClass("hidden");
+}
+
+function selectStaff() {
+  $("#select-staff").removeClass("hidden");
+}
+
+function updatePart() {
+  $("#inputs .part").text(
+    $("#select-part .dropdown").val()
+  );
+}
+
+function updateStaff() {
+  $("#inputs .staff").text(
+    $("#select-staff .staff-no").val()
   );
 }
 
 function openPopup(message) {
-  $("#popup .content").html(message);
-  $("#popup").removeClass("hidden");
+  $("#info .content").html(message);
+  $("#info").removeClass("hidden");
 }
 
 function closePopup() {
-  $("#popup").addClass("hidden");
+  $(window.event.srcElement).parent().addClass("hidden");
 }
 
 function generate() {
-  if (this?.inProgress) {
-    return;
-  }
-
-  this.inProgress = true;
-
   let music = getUploads("music");
   let lyrics = getUploads("lyrics");
 
-  if (!music[0]?.type.includes("xml")) {
-    openPopup(`The music file should be MusicXML, not ${music[0]?.type}.`);
-    return;
-  }
-
-  if (!lyrics[0]?.type.includes("txt")) {
-    openPopup(`The lyrics file should be text, not ${lyrics[0]?.type}.`);
+  if (music.length === 0 || lyrics.length === 0) {
+    openPopup("You must select a music file and a lyrics file.");
     return;
   }
 
@@ -84,9 +120,14 @@ function generate() {
     function (musicValue) {
       lyrics[0].text().then(
         function (lyricsValue) {
-          generate.inProgress = false;
-          let out = addLyrics(musicValue, lyricsValue);
-          console.log(out);
+          try {
+            let out = addLyrics(musicValue, lyricsValue);
+            let name = music[0].name.split(".")[0];
+            downloadString(out, `${name}-with-lyrics.musicxml`);
+          }
+          catch (e) {
+            openPopup(e.message);
+          }
         }
       );
     }
@@ -94,5 +135,87 @@ function generate() {
 }
 
 function addLyrics(music, lyrics) {
-  return `---MUSIC---\n${music}\n---LYRICS---\n${lyrics}\n`;
+  let xmlDoc = $.parseXML(music);
+  let xml = $(xmlDoc);
+
+  let words = lyrics.split(" ");
+
+  const PART = $("#inputs .part").text();
+  const STAFF = $("#inputs .staff").text();
+
+  let part = xml.find(`part[id="${PART}"]`);
+
+  if (part.length === 0) {
+    throw new Error(`No such part: "${PART}"`);
+  }
+
+  part.find("note").each(getNoteHandler(STAFF, getGenerator(words)));
+
+  return new XMLSerializer().serializeToString(xmlDoc);
+}
+
+function getNoteHandler(staff, lyricGenerator) {
+  return function () {
+    let $this = $(this);
+
+    if ($this.children("staff").prop("innerHTML") !== staff) {
+      return true; // skip notes in wrong staff
+    }
+
+    if ($this.children("rest").length > 0) {
+      return true; // don't put lyrics on rests
+    }
+
+    if ($this.children("chord").length > 0) {
+      return true; // don't put lyrics on secondary notes of chords
+    }
+
+    word = lyricGenerator.next();
+
+    if (word.done) {
+      return false; // stop if there are no more lyrics
+    }
+
+    if (word.value.startsWith("%")) {
+      return false; // skip note if word starts with '%'
+    }
+
+    if (word.value.startsWith("\\")) {
+      word.value = word.value.substring(1);
+    }
+
+    let lyricElement = $this.children("lyric").eq(0);
+
+    if (lyricElement.length > 0) {
+      lyricElement.children("text").text(word.value);
+    }
+    else {
+      $this.append(
+        `<lyric number="1">` +
+        `<syllabic>single</syllabic>` +
+        `<text>${word.value}</text>` +
+        `</lyric>`
+      );
+    }
+  }
+}
+
+function* getGenerator(collection) {
+  for (let item of collection) {
+    yield item;
+  }
+}
+
+function downloadString(str, name) {
+  const HEADER = "data:application/octet-stream;charset=utf-8,";
+  let url = HEADER + encodeURIComponent(str);
+
+  let link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  link.style.display = "none";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
